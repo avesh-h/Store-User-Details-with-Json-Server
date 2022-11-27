@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useEffect, useState } from "react";
+import LoginForm from "./components/LoginForm";
+import {
+  Routes,
+  Route,
+  BrowserRouter as Router,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
+import DataForm from "./components/DataForm";
+import PrivateRoute from "./components/PrivateRoute";
+// import DataTable from "./components/DataTable";
+import { useParams } from "react-router-dom";
+import SingleUser from "./components/SingleUser";
+import { useSelector } from "react-redux";
 
 function App() {
+  const users = useSelector((state) => state.user);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<LoginForm />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DataForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={`/dashboard/:id`}
+            element={<SingleUser users={users} />}
+          />
+        </Routes>
+      </div>
+      {/* <PrivateRoute /> */}
+    </Router>
   );
 }
 

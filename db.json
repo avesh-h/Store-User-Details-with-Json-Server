@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Avesh",
+      "email": "avesh@gmail.com",
+      "gender": "Male",
+      "country": "America",
+      "state": "Texas",
+      "city": "houston",
+      "mobile": "123456",
+      "DOB": "2022-11-17",
+      "hobby": [
+        "Sports",
+        "Travel",
+        "Gym"
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "some comment",
+      "postId": 1
+    }
+  ],
+  "profile": {
+    "name": "typicode"
+  }
+}
