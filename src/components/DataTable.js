@@ -6,11 +6,16 @@ const DataTable = (props) => {
   const allUserData = useSelector((state) => {
     // debugger;
     console.log("axios array", state.user);
+    // const userIds = state.user.map((user)=>user.id)
+    for (let index = 0; index < state.user.length; index++) {
+      // console.log("condition", [index]);
+    }
     return state.user;
   });
 
-  const handleDelete = (userid) => {
-    props.onUserRemove(userid);
+  const handleDelete = (useridObj) => {
+    // console.log("FOr Delete Id", useridObj);
+    props.onUserRemove(useridObj);
   };
   const handleEdit = (userid) => {
     props.onUserUpdate(userid);
@@ -42,7 +47,7 @@ const DataTable = (props) => {
           </thead>
           {allUserData.map((user) => {
             return (
-              <tbody key={user.id}>
+              <tbody key={user._id}>
                 <tr>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
@@ -54,18 +59,18 @@ const DataTable = (props) => {
                   <td>{user.mobile}</td>
                   <td>{user.DOB}</td>
                   {/* <td>
-                    {Object.values(user.hobby)
-                      .map(
-                        (isCheak, index) =>
-                          isCheak && Object.keys(user.hobby)[index]
-                      )
-                      .filter((d) => d)
-                      .toString()}
+                    {user.hobby.map((hob, index) => {
+                      return <span key={`${hob},${index}`}> &nbsp;{hob}</span>;
+                    })}
                   </td> */}
                   <td>{user.hobby.toString()}</td>
                   <td>
                     <button onClick={() => handleEdit(user.id)}>Edit</button>
-                    <button onClick={() => handleDelete(user.id)}>
+                    <button
+                      onClick={() =>
+                        handleDelete({ mongoId: user._id, userId: user.id })
+                      }
+                    >
                       Delete
                     </button>
                   </td>

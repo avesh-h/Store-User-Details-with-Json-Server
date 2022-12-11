@@ -6,13 +6,11 @@ import {
   editUsers,
   getUsers,
   removeUsers,
-  sendUsers,
   userActions,
 } from "../store/UserData";
 import DataTable from "./DataTable";
 import { useSelector } from "react-redux";
 import Form from "./form";
-import Axios from "axios";
 
 const world = {
   countries: [
@@ -70,6 +68,14 @@ const world = {
   ],
 };
 const DataForm = () => {
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const JsonData = await Axios.get("http://localhost:3000/posts");
+  //     console.log("getjson data", JsonData.data);
+  //   };
+  //   fetchData();
+  // }, []);
+
   const [userData, setUserData] = useState({
     name: "",
     email: "",
@@ -80,14 +86,8 @@ const DataForm = () => {
     mobile: "",
     DOB: "",
     hobby: [],
-    // hobby: {
-    //   Sports: false,
-    //   Travel: false,
-    //   Gym: false,
-    //   Study: false,
-    //   Reading: false,
-    // },
   });
+
   const [userEdit, setUserEdit] = useState(false);
   // const [isChecked, setIsChecked] = useState(false);
   const [editid, setEditId] = useState();
@@ -110,6 +110,8 @@ const DataForm = () => {
       );
       setSelectedState(userSelectedState);
     }
+
+    // dispatch(getUsers());
   }, [userData.country, userData.state]);
   useEffect(() => {
     dispatch(getUsers());
@@ -117,19 +119,20 @@ const DataForm = () => {
 
   const changeHandler = (e) => {
     const { name, value, checked, type } = e.target;
-    // debugger;
+
     if (type === "checkbox") {
       if (checked) {
         setUserData({
           ...userData,
           hobby: [...userData.hobby, name],
         });
-      } else {
+      } else if (!checked) {
         setUserData({
           ...userData,
-          hobby: userData.hobby.filter((hobby) => hobby !== name),
+          hobby: userData.hobby.filter((hobbie) => hobbie !== name),
         });
       }
+      // const allHobbies = userData.hobby.push(name);
     }
     if (type !== "checkbox") {
       setUserData({
@@ -140,36 +143,47 @@ const DataForm = () => {
   };
 
   //Add Functionality
+  const setId = () => {
+    const UID = 1;
+
+    const Ids = users.map((user) => user.id);
+    if (users.length === 0) {
+      return UID;
+    } else if (users.length > 0) {
+      let updatedId = Math.max(...Ids);
+      updatedId = updatedId + 1;
+      return updatedId;
+    }
+  };
+
   const submitHandler = (e) => {
     e.preventDefault();
+    // console.log("frontend Users", users);
+    // console.log("submuit");
     // console.log("After Added checkbox", fullData ? fullData : "none");
-    const UID = 1;
-    const setId = () => {
-      const Ids = users.map((user) => user.id);
-      if (users.length === 0) {
-        return UID;
-      } else if (users.length > 0) {
-        let updatedId = Math.max(...Ids);
-        updatedId = updatedId + 1;
-        return updatedId;
-      }
-    };
 
     const fullData = {
       id: setId(),
       ...userData,
     };
-    console.log(":fullData", fullData);
+
     // if(hobbies.)
-    dispatch(userActions.getUserData(fullData));
+
+    //Dispatch Before using without Database
+    // dispatch(userActions.getUserData(fullData));
+
     if (userEdit) {
       const EditData = {
         ...userData,
         id: editid,
       };
+      // console.log("before backend", EditData);
       dispatch(editUsers(EditData));
+      dispatch(getUsers());
     } else {
+      // console.log("after", fullData);
       dispatch(addUsers(fullData));
+      dispatch(getUsers());
     }
     // dispatch(addUsers(fullData));
 
@@ -177,13 +191,6 @@ const DataForm = () => {
       name: "",
       email: "",
       mobile: "",
-      // hobby: {
-      //   Sports: false,
-      //   Travel: false,
-      //   Gym: false,
-      //   Study: false,
-      //   Reading: false,
-      // },
       hobby: [],
       DOB: "",
       gender: "",
@@ -213,7 +220,9 @@ const DataForm = () => {
       mobile: editUser.mobile,
       DOB: editUser.DOB,
       hobby: editUser.hobby,
+      _id: editUser._id,
     };
+    console.log("edit");
     setUserData(editedUserDetail);
     // const editedData = {
     //   ...userData,
@@ -227,17 +236,144 @@ const DataForm = () => {
   };
 
   //Delete Functionality
-  const removeHandler = (id) => {
-    dispatch(userActions.removeUserData(id));
-    dispatch(removeUsers(id));
+  const removeHandler = (idsObj) => {
+    // dispatch(userActions.removeUserData(id));
+    dispatch(removeUsers(idsObj));
+    dispatch(getUsers());
   };
 
   const logOutHandler = () => {
     localStorage.removeItem("isLoggedIn");
     navigate("/");
   };
+  // console.log("End at Data Form", userData);
   return (
     <>
+      {/* <form onSubmit={submitHandler}>
+        <h1>Please Enter Your Data</h1>
+        <label>Name:</label>
+        <input
+          type="text"
+          value={userData.name}
+          onChange={changeHandler}
+          name="name"
+        />
+        <br />
+        <label>Email:</label>
+        <input
+          type="text"
+          value={userData.email}
+          onChange={changeHandler}
+          name="email"
+        />
+        <br />
+        <label>Phone No:</label>
+        <input
+          type="number"
+          value={userData.mobile}
+          onChange={changeHandler}
+          name="mobile"
+        />
+        <br />
+        <label>DOB:</label>
+        <input
+          type="date"
+          value={userData.DOB}
+          onChange={changeHandler}
+          name="DOB"
+        />
+        <label>Hobby:</label>
+        <textarea
+          rows="4"
+          cols="50"
+          onChange={changeHandler}
+          name="hobby"
+          value={userData.hobby}
+        />
+        <br />
+        <label>Gender:</label>
+          
+        <label htmlFor="male">
+          <input
+            type="radio"
+            value="Male"
+            name="gender"
+            checked={userData.gender === "Male"}
+            onChange={changeHandler}
+          />
+          Male
+        </label>
+           
+        <label htmlFor="female">
+          <input
+            type="radio"
+            value="Female"
+            name="gender"
+            checked={userData.gender === "Female"}
+            onChange={changeHandler}
+          />
+          Female
+        </label>
+        <br />
+        <label htmlFor="countries">Choose a Country:</label>
+        <select
+          value={userData.country}
+          placeholder="country"
+          name="country"
+          onChange={changeHandler}
+        >
+          <option value="--Choose Country--">--Choose Country--</option>
+          {world.countries.map((country, index) => {
+            return (
+              <option value={country.name} key={`Countries-${index}`}>
+                {country.name}
+              </option>
+            );
+          })}
+        </select>
+        <label>State</label>
+        <select
+          value={userData.state}
+          placeholder="State"
+          name="state"
+          onChange={changeHandler}
+        >
+          <option value="--Choose State--">--Choose State--</option>
+          {selectedCountry === undefined
+            ? ""
+            : selectedCountry.states.map((state, index) => {
+                return (
+                  <option value={state.name} key={`state-${index}`}>
+                    {state.name}
+                  </option>
+                );
+              })}
+        </select>
+        <label>Cities</label>
+        <select
+          value={userData.city}
+          placeholder="City"
+          name="city"
+          onChange={changeHandler}
+        >
+          <option value="--Choose City--">--Choose City--</option>
+          {selectedState === undefined
+            ? ""
+            : selectedState.cities.map((city, index) => {
+                return (
+                  <option value={city} key={`city-${index}`}>
+                    {city}
+                  </option>
+                );
+              })}
+        </select>
+        {userEdit ? (
+          <button type="submit">Update</button>
+        ) : (
+          <button type="submit">Submit</button>
+        )}
+        <button onClick={logOutHandler}>Log Out</button>
+      </form> */}
       <Form
         users={users}
         selectedState={selectedState}

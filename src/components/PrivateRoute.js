@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import DataForm from "./DataForm";
 
 const PrivateRoute = ({ ...props }) => {
-  const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
+  const isLoggedIn = localStorage.getItem("Token");
 
   return (
     <div>{isLoggedIn === null ? <Navigate to="/" /> : props.children}</div>

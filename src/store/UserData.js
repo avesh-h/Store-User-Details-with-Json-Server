@@ -1,23 +1,49 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Axios from "axios";
 
-export const getUsers = createAsyncThunk("user/getUsers", async () => {
-  const data = await Axios.get("http://localhost:3000/users");
-  // console.log(data);
-  return data.data;
+const getToken = localStorage.getItem("Token");
+
+// console.log("GetTOkenn", getToken);
+
+export const getUsers = createAsyncThunk("data/users", async () => {
+  const data = await Axios.get("http://localhost:3001/data/users", {
+    headers: {
+      authorization: getToken,
+    },
+  });
+  // console.log("getData", data);
+  return data;
 });
 
 export const addUsers = createAsyncThunk("user/addUsers", async (Data) => {
-  Axios.post("http://localhost:3000/users", Data);
+  // console.log("dataaaaaa", Data);
+  const data = await Axios.post("http://localhost:3001/data/add", Data, {
+    headers: {
+      authorization: getToken,
+    },
+  });
+  return data;
 });
 
 export const editUsers = createAsyncThunk("user/editUsers", async (Data) => {
   console.log("edited", Data);
-  Axios.put(`http://localhost:3000/users/${Data.id}`, Data);
+  console.log("mongo Id", Data._id);
+  Axios.put(`http://localhost:3001/data/${Data.id}`, Data, {
+    headers: {
+      authorization: getToken,
+      id: Data._id,
+    },
+  });
 });
 
-export const removeUsers = createAsyncThunk("user/removeUsers", async (id) => {
-  Axios.delete(`http://localhost:3000/users/${id}`);
+export const removeUsers = createAsyncThunk("user/removeUsers", async (ids) => {
+  // console.log("from user Data id Objects------------->", ids);
+  Axios.delete(`http://localhost:3001/data/${ids.userId}`, {
+    headers: {
+      authorization: getToken,
+      id: ids.mongoId,
+    },
+  });
 });
 
 export const userSlice = createSlice({
@@ -25,6 +51,7 @@ export const userSlice = createSlice({
   initialState: [],
   reducers: {
     getUserData(state, action) {
+      let Data;
       //Edit Logic
       const editedUser = state.findIndex(
         (user) => user.id === action.payload.id
@@ -32,9 +59,13 @@ export const userSlice = createSlice({
       if (state.find((user) => user.id === action.payload.id)) {
         state = state.splice(editedUser, 1, action.payload);
       } else {
-        const Data = {
+        Data = {
           ...action.payload,
         };
+        state = [...state, ...action.payload];
+        console.log(state);
+        return state;
+
         state = state.push(Data);
       }
       // console.log("Edit user", action.payload);
@@ -62,24 +93,24 @@ export const userSlice = createSlice({
       // };
       // state = state.push(Data);
     },
-    // editUserData(state, action) {
-    //   console.log("edituserData redux", action.payload);
-    // },
+
     removeUserData(state, action) {
       return (state = state.filter((user) => user.id !== action.payload));
     },
-    editUserdata(state, action) {
-      const editUserIndex = state.findIndex(
-        (user) => user.id === action.payload.id
-      );
-      state = state.splice(editUserIndex, 1, action.payload);
-    },
+    // editUserdata(state, action) {
+    //   const editUserIndex = state.findIndex(
+    //     (user) => user.id === action.payload.id
+    //   );
+    //   state = state.splice(editUserIndex, 1, action.payload);
+    // },
   },
   extraReducers: (builder) => {
     builder
       .addCase(getUsers.fulfilled, (state, action) => {
         //This State and action will give you the response which is coming from the JSON-server
-        state = action.payload;
+        console.log("New Userr", action.payload);
+        state = action.payload.data;
+
         return state;
       })
       .addCase(addUsers.fulfilled)
